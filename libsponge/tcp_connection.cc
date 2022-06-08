@@ -74,7 +74,7 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
 bool TCPConnection::active() const { return _active; }
 
 size_t TCPConnection::write(const string &data) {
-    if (data.empty()) return 0;
+    if (!data.size()) return 0;
     size_t write_size = _sender.stream_in().write(data);
     _sender.fill_window();
     send_sender_segments();
