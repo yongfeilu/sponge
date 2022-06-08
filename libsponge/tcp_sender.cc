@@ -34,7 +34,7 @@ void TCPSender::fill_window() {
        return;
    } 
    // SYN not acked, do nothing
-   if (!_segments_outstanding.empty() && !_segments_outstanding.front().header().syn) return;
+   if (!_segments_outstanding.empty() && _segments_outstanding.front().header().syn) return;
    // outgoing stream empty but not yet ended, do nothing
    if (!_stream.buffer_size() && !_stream.eof()) return;
    if (_fin_sent) return;
@@ -61,7 +61,7 @@ void TCPSender::fill_window() {
            seg.header().fin = true;
 	   _fin_sent = true;
 	   _send_segment(seg);
-       } else if (!_stream.buffer_empty()) {
+       } else if (_stream.buffer_size()) {
            seg.payload() = _stream.read(1);
 	   _send_segment(seg);
        }
