@@ -12,8 +12,8 @@ void DUMMY_CODE(Targs &&... /* unused */) {}
 
 using namespace std;
 
-StreamReassembler::StreamReassembler(const size_t capacity) 
-	: _output(capacity), _capacity(capacity), _first_unacceptable(capacity) {}
+StreamReassembler::StreamReassembler(const size_t capacity)
+    : _output(capacity), _capacity(capacity), _first_unacceptable(capacity) {}
 
 //! \details This function accepts a substring (aka a segment) of bytes,
 //! possibly out-of-order, from the logical stream, and assembles any newly
@@ -24,26 +24,29 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
     seg new_seg = {index, data.length(), data};
     _add_new_seg(new_seg, eof);
     _stitch_output();
-    if (empty() && _eof) _output.end_input();
+    if (empty() && _eof)
+        _output.end_input();
 }
 
 void StreamReassembler::_add_new_seg(seg &new_seg, const bool eof) {
-    if (new_seg.index >= _first_unacceptable) return;
+    if (new_seg.index >= _first_unacceptable)
+        return;
     bool eof_of_this_seg = eof;
-    if (int overflow_bytes = new_seg.index + new_seg.length - _first_unacceptable;
-	overflow_bytes > 0) {
+    if (int overflow_bytes = new_seg.index + new_seg.length - _first_unacceptable; overflow_bytes > 0) {
         int new_length = new_seg.length - overflow_bytes;
-	if (new_length <= 0) return;
-	eof_of_this_seg = false;
-	new_seg.length = new_length;
-	new_seg.data = new_seg.data.substr(0, new_seg.length);
+        if (new_length <= 0)
+            return;
+        eof_of_this_seg = false;
+        new_seg.length = new_length;
+        new_seg.data = new_seg.data.substr(0, new_seg.length);
     }
     if (new_seg.index < _first_unassembled) {
         int new_length = new_seg.length - (_first_unassembled - new_seg.index);
-	if (new_length <= 0) return;
-	new_seg.length = new_length;
-	new_seg.data = new_seg.data.substr(_first_unassembled - new_seg.index, new_seg.length);
-	new_seg.index = _first_unassembled;
+        if (new_length <= 0)
+            return;
+        new_seg.length = new_length;
+        new_seg.data = new_seg.data.substr(_first_unassembled - new_seg.index, new_seg.length);
+        new_seg.index = _first_unassembled;
     }
     _handle_overlap(new_seg);
     _eof = _eof || eof_of_this_seg;
@@ -52,13 +55,13 @@ void StreamReassembler::_add_new_seg(seg &new_seg, const bool eof) {
 void StreamReassembler::_handle_overlap(seg &new_seg) {
     for (auto it = _stored_segs.begin(); it != _stored_segs.end();) {
         auto next_it = ++it;
-	--it;
-	if ((new_seg.index >= it->index && new_seg.index < it->index + it->length) ||
-	    (it->index >= new_seg.index && it->index < new_seg.index + new_seg.length)) {
-	    _merge_seg(new_seg, *it);
-	    _stored_segs.erase(it);
-	}
-	it = next_it;
+        --it;
+        if ((new_seg.index >= it->index && new_seg.index < it->index + it->length) ||
+            (it->index >= new_seg.index && it->index < new_seg.index + new_seg.length)) {
+            _merge_seg(new_seg, *it);
+            _stored_segs.erase(it);
+        }
+        it = next_it;
     }
     _stored_segs.insert(new_seg);
 }
@@ -66,7 +69,7 @@ void StreamReassembler::_handle_overlap(seg &new_seg) {
 void StreamReassembler::_stitch_output() {
     while (!_stored_segs.empty() && _stored_segs.begin()->index == _first_unassembled) {
         _stitch_one_seg(*_stored_segs.begin());
-	_stored_segs.erase(_stored_segs.begin());
+        _stored_segs.erase(_stored_segs.begin());
     }
 }
 

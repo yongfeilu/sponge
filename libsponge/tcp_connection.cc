@@ -21,7 +21,8 @@ size_t TCPConnection::unassembled_bytes() const { return _receiver.unassembled_b
 size_t TCPConnection::time_since_last_segment_received() const { return _time_since_last_segment_received; }
 
 void TCPConnection::segment_received(const TCPSegment &seg) {
-    if (!_active) return;
+    if (!_active)
+        return;
     _time_since_last_segment_received = 0;
     // TCP connection not inited yet: receive an ISN seg to init TCP connection
     if (!_receiver.ackno().has_value() && _sender.next_seqno_absolute() == 0) {
@@ -81,10 +82,11 @@ size_t TCPConnection::write(const string &data) {
 
 //! \param[in] ms_since_last_tick number of milliseconds since the last call to this method
 void TCPConnection::tick(const size_t ms_since_last_tick) {
-    if (!_active) return;
+    if (!_active)
+        return;
     _time_since_last_segment_received += ms_since_last_tick;
     _sender.tick(ms_since_last_tick);
-    if (_sender.consecutive_retransmissions() > TCPConfig::MAX_RETX_ATTEMPTS) 
+    if (_sender.consecutive_retransmissions() > TCPConfig::MAX_RETX_ATTEMPTS)
         unclean_shutdown();
     send_sender_segments();
 }

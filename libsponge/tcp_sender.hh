@@ -31,7 +31,7 @@ class TCPSender {
 
     //! the (absolute) sequence number for the next byte to be sent
     uint64_t _next_seqno{0};
-    
+
     bool _syn_sent = false;
     bool _fin_sent = false;
     uint64_t _bytes_in_flight = 0;

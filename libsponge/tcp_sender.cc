@@ -2,8 +2,8 @@
 
 #include "tcp_config.hh"
 
-#include <random>
 #include <algorithm>
+#include <random>
 // Dummy implementation of a TCP sender
 
 // For Lab 3, please replace with a real implementation that passes the
@@ -28,16 +28,19 @@ uint64_t TCPSender::bytes_in_flight() const { return _bytes_in_flight; }
 void TCPSender::fill_window() {
     if (!_syn_sent) {
         _syn_sent = true;
-	TCPSegment seg;
-	seg.header().syn = true;
-	_send_segment(seg);
-	return;
-    } 
-   // SYN not acked, do nothing
-    if (!_segments_outstanding.empty() && _segments_outstanding.front().header().syn) return;
-   // outgoing stream empty but not yet ended, do nothing
-    if (!_stream.buffer_size() && !_stream.eof()) return;
-    if (_fin_sent) return;
+        TCPSegment seg;
+        seg.header().syn = true;
+        _send_segment(seg);
+        return;
+    }
+    // SYN not acked, do nothing
+    if (!_segments_outstanding.empty() && _segments_outstanding.front().header().syn)
+        return;
+    // outgoing stream empty but not yet ended, do nothing
+    if (!_stream.buffer_size() && !_stream.eof())
+        return;
+    if (_fin_sent)
+        return;
 
     if (_receiver_window_size) {
         while (_receiver_free_space) {
@@ -54,8 +57,8 @@ void TCPSender::fill_window() {
             if (_stream.buffer_empty())
                 break;
         }
-       // if not allowed to send, act like sending segment of length 1
-   } else if (_receiver_free_space == 0) {
+        // if not allowed to send, act like sending segment of length 1
+    } else if (_receiver_free_space == 0) {
         TCPSegment seg;
         if (_stream.eof()) {
             seg.header().fin = true;
@@ -71,7 +74,6 @@ void TCPSender::fill_window() {
 //! \param ackno The remote receiver's ackno (acknowledgment number)
 //! \param window_size The remote receiver's advertised window size
 void TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_size) {
-    
     // unwrap ackno to abs ackno and check its validity
     uint64_t abs_ackno = unwrap(ackno, _isn, _next_seqno);
     if (!_ack_valid(abs_ackno)) {
@@ -84,8 +86,8 @@ void TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
     // check which outstading segments have been acked
     while (!_segments_outstanding.empty()) {
         TCPSegment seg = _segments_outstanding.front();
-	// if acked, pop it from outstanding segs, and reset the timer
-	if (unwrap(seg.header().seqno, _isn, _next_seqno) + seg.length_in_sequence_space() <= abs_ackno) {
+        // if acked, pop it from outstanding segs, and reset the timer
+        if (unwrap(seg.header().seqno, _isn, _next_seqno) + seg.length_in_sequence_space() <= abs_ackno) {
             _bytes_in_flight -= seg.length_in_sequence_space();
             _segments_outstanding.pop();
             _time_elapsed = 0;
@@ -106,13 +108,14 @@ void TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
     if (!_bytes_in_flight)
         _timer_running = false;
 
-    //fill window if possible
+    // fill window if possible
     fill_window();
 }
 
 //! \param[in] ms_since_last_tick the number of milliseconds since the last call to this method
 void TCPSender::tick(const size_t ms_since_last_tick) {
-    if (!_timer_running) return;
+    if (!_timer_running)
+        return;
     _time_elapsed += ms_since_last_tick;
     // if times out for outstanding seg -> resend
     if (_time_elapsed >= _rto) {

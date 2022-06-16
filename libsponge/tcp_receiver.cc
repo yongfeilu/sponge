@@ -12,23 +12,27 @@ using namespace std;
 
 void TCPReceiver::segment_received(const TCPSegment &seg) {
     TCPHeader header = seg.header();
-    if (header.syn && _syn) return;
+    if (header.syn && _syn)
+        return;
     if (header.syn) {
         _syn = true;
-	_isn = header.seqno.raw_value();
+        _isn = header.seqno.raw_value();
     }
 
-    if (_syn && header.fin) _fin = true;
+    if (_syn && header.fin)
+        _fin = true;
     size_t absolute_seqno = unwrap(header.seqno, WrappingInt32(_isn), _checkpoint);
     _reassembler.push_substring(seg.payload().copy(), header.syn ? 0 : absolute_seqno - 1, header.fin);
     _checkpoint = absolute_seqno;
 }
 
-optional<WrappingInt32> TCPReceiver::ackno() const { 
+optional<WrappingInt32> TCPReceiver::ackno() const {
     // convert stream index to abs seqno then to seqno
     size_t shift = 1;
-    if (_fin && _reassembler.unassembled_bytes() == 0) shift++;
-    if (_syn) return wrap(_reassembler.first_unassembled() + shift, WrappingInt32(_isn));
+    if (_fin && _reassembler.unassembled_bytes() == 0)
+        shift++;
+    if (_syn)
+        return wrap(_reassembler.first_unassembled() + shift, WrappingInt32(_isn));
     return {};
 }
 

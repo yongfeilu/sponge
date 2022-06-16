@@ -5,6 +5,7 @@
 #include "tcp_over_ip.hh"
 #include "tun.hh"
 
+#include <map>
 #include <optional>
 #include <queue>
 
@@ -31,6 +32,9 @@
 //! and learns or replies as necessary.
 class NetworkInterface {
   private:
+    static constexpr size_t MAX_RETX_WAITING_TIME = 5000;
+    static constexpr size_t MAX_CACHE_TIME = 30000;
+
     //! Ethernet (known as hardware, network-access-layer, or link-layer) address of the interface
     EthernetAddress _ethernet_address;
 
@@ -39,6 +43,30 @@ class NetworkInterface {
 
     //! outbound queue of Ethernet frames that the NetworkInterface wants sent
     std::queue<EthernetFrame> _frames_out{};
+
+    struct EthernetAddressEntry {
+        size_t caching_time;
+        EthernetAddress MAC_address;
+    };
+
+    std::map<uint32_t, EthernetAddressEntry> _cache{};
+
+    struct WaitingList {
+        size_t time_since_last_ARP_request_send = 0;
+        std::queue<InternetDatagram> waiting_datagram{};
+    };
+
+    std::map<uint32_t, WaitingList> _queue_map{};
+
+    std::optional<EthernetAddress> get_EthernetAddress(const uint32_t ip_addr);
+    std::optional<WaitingList> get_WaitingList(const uint32_t ip_addr);
+    void send_helper(const EthernetAddress MAC_addr, const InternetDatagram &dgram);
+    void queue_helper(const uint32_t ip_addr, const InternetDatagram &dgram);
+    void send_ARP_request(const uint32_t ip_addr);
+    void send_ARP_reply(const uint32_t ip_addr, const EthernetAddress &MAC_addr);
+    bool valid_frame(const EthernetFrame &frame);
+    void cache_mapping(uint32_t ip_addr, EthernetAddress MAC_addr);
+    void clear_waitinglist(uint32_t ip_addr, EthernetAddress MAC_addr);
 
   public:
     //! \brief Construct a network interface with given Ethernet (network-access-layer) and IP (internet-layer) addresses

@@ -4,8 +4,8 @@
 #include "byte_stream.hh"
 
 #include <cstdint>
-#include <string>
 #include <set>
+#include <string>
 
 //! \brief A class that assembles a series of excerpts from a byte stream (possibly out of order,
 //! possibly overlapping) into an in-order byte stream.
@@ -21,9 +21,9 @@ class StreamReassembler {
     bool _eof = false;
     struct seg {
         size_t index;
-	size_t length;
-	std::string data;
-	bool operator<(const seg t) const {return index < t.index;}
+        size_t length;
+        std::string data;
+        bool operator<(const seg t) const { return index < t.index; }
     };
     std::set<seg> _stored_segs = {};
     void _add_new_seg(seg &new_seg, const bool eof);
@@ -31,6 +31,7 @@ class StreamReassembler {
     void _stitch_output();
     void _stitch_one_seg(const seg &new_seg);
     void _merge_seg(seg &new_seg, const seg &other);
+
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
     //! \note This capacity limits both the bytes that have been reassembled,
@@ -63,7 +64,7 @@ class StreamReassembler {
     //! \returns `true` if no substrings are waiting to be assembled
     bool empty() const;
 
-    size_t first_unassembled() const {return _first_unassembled; }
+    size_t first_unassembled() const { return _first_unassembled; }
 };
 
 #endif  // SPONGE_LIBSPONGE_STREAM_REASSEMBLER_HH
