@@ -1,3 +1,13 @@
+## Project overview
+The project aims to implement a network stack that inlcudes ByteStream, StreamReassembler, TCPReceiver, TCPSender, TCPConnection, Network interface, and IP router. Finally, we create a real network that enables the self-implemented network stacks exchanging data with each other.
+
+![alt text](./imgs/overview.png?raw=true)
+
+Two network stacks talking to each other:
+![alt text](./imgs/talk.png?raw=true)
+Sending file over the two network stacks:
+![alt text](./imgs/send_file.png?raw=true)
+
 For build prereqs, see [the CS144 VM setup instructions](https://web.stanford.edu/class/cs144/vm_howto).
 
 ## Sponge quickstart
